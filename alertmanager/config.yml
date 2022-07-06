@@ -1,7 +1,38 @@
 route:
-    receiver: 'pager'
-
+    #Para agregar por todas las etiquetas posibles utilice '...' como único nombre de etiqueta.
+    #Esto desactiva la agregación por completo, pasando por todas las alertas tal cual. 
+    #Es poco probable que esto sea lo que usted desea, a menos que tenga un volumen de alertas 
+    #muy bajo o que su sistema de notificación anterior realice su propia agrupación. Ejemplo: group_by: [...]
+    group_by: ['alertname', 'cluster', 'service']
+    
+    # Cuánto tiempo debe esperar inicialmente para enviar una notificación para un grupo de alertas. 
+    # Permite esperar a que llegue una alerta de inhibición o recoger más alertas iniciales para el mismo grupo.
+    group_wait: 30s
+    # Cuánto tiempo debe transcurrir antes de enviar una notificación sobre nuevas alertas que se añaden a un 
+    # grupo de alertas para las que ya se ha enviado una notificación inicial.
+    group_interval: 10m
+    # Si una alerta ha sido enviada con éxito, espera 'repeat_interval' para volver a enviarlas.
+    repeat_interval: 24h
+    
+    receiver: noti_x_email
+    routes:
+    - match:
+        typesend: all
+        continue: true
+        receiver: noti_x_email
+    - match:
+        typesend: all
+        continue: true
+        receiver: 'null'
 receivers:
-    - name: 'pager'
-      webhook_configs:
-      - url: https://ngrok.io # replace with your PagerTree webhook url
+  - name: 'noti_x_email'
+    email_configs:
+    - to: 'dsanchez@paradigmadigital.com'
+      from: 'no-reply@mutua.es'
+      smarthost: 'mutua.es:25'
+      auth_username: 'zabbix@mutua.es'
+      #auth_identity: 'smartcitycostadelsol@gmail.com'
+      #auth_password: 'Sm4rtC0st4'
+      send_resolved: true
+      require_tls: false
+  - name: 'null'

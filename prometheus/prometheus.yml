@@ -11,7 +11,7 @@ global:
 
 # Load and evaluate rules in this file every 'evaluation_interval' seconds.
 rule_files:
-  - 'alert.rules'
+  - 'alert.yml'
   # - "first.rules"
   # - "second.rules"
 
@@ -27,21 +27,42 @@ alerting:
 # Here it's Prometheus itself.
 scrape_configs:
   # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
-  - job_name: 'prometheus'
-  - job_name: 'node'
-
+  - job_name: 'serviceMonitor/prometheus'
     # Override the global default and scrape targets from this job every 5 seconds.
     scrape_interval: 5s
-
+    static_configs:
+      - targets:
+        - prometheus:9090
+  - job_name: 'serviceMonitor/cadvisor'
+    # Override the global default and scrape targets from this job every 5 seconds.
+    scrape_interval: 5s
     # metrics_path defaults to '/metrics'
     # scheme defaults to 'http'.
-
     static_configs:
          - targets:
-           - localhost:9090
            - cadvisor:8080
+  - job_name: 'serviceMonitor/node-exporter'
+    # Override the global default and scrape targets from this job every 5 seconds.
+    scrape_interval: 5s
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+    static_configs:
+         - targets:
            - node-exporter:9100
-  - job_name: 'blackbox'
+           labels:
+             name: 'monitorizaciondocker'
+  - job_name: 'serviceMonitor/process-exporter'
+    # Override the global default and scrape targets from this job every 5 seconds.
+    scrape_interval: 5s
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+    static_configs:
+         - targets:
+           - process-exporter:9256
+           labels:
+             name: 'monitorizaciondocker'
+  - job_name: 'serviceMonitor/blackbox-exporter'
+    scrape_interval: 10s
     metrics_path: /probe
     params:
       module: [http_2xx]  # Look for a HTTP 200 response.
